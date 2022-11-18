@@ -21,7 +21,7 @@ const Task = ({ task }) => {
   };
 
   return (
-    <li key={task.id} className={getClasses(task.status)}>
+    <div className={getClasses(task.status)}>
       <div className="task__view">
         <input className="task__toggle" type="checkbox" />
         <label className="task__label">
@@ -34,7 +34,7 @@ const Task = ({ task }) => {
         <button className="icon icon-destroy"></button>
       </div>
       {renderInput(task.status)}
-    </li>
+    </div>
   );
 };
 

@@ -6,7 +6,12 @@ const TaskList = ({ tasks }) => {
   return (
     <ul className="task-list">
       {tasks.map((task) => {
-        return <Task task={task} />;
+        const { id, ...itemProps } = task;
+        return (
+          <li key={id}>
+            <Task task={itemProps} />
+          </li>
+        );
       })}
     </ul>
   );

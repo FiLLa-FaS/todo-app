@@ -12,19 +12,19 @@ export default class App extends Component {
       {
         id: 1,
         description: "Completed task",
-        createdTime: new Date(),
+        createdTime: new Date("2017-01-26"),
         status: "completed",
       },
       {
         id: 2,
         description: "Editing task",
-        createdTime: new Date(),
+        createdTime: new Date("2017-01-27"),
         status: "default",
       },
       {
         id: 3,
         description: "Active task",
-        createdTime: new Date(),
+        createdTime: new Date("2017-01-28"),
         status: "default",
       },
     ],
@@ -32,7 +32,9 @@ export default class App extends Component {
 
   markComplete = (id) => {
     this.setState(({ tasks }) => {
-      let newArr = tasks.concat();
+      let newArr = tasks.map((a) => {
+        return { ...a };
+      });
       newArr.map((task) => {
         if (task.id === id) {
           if (task.status === "default") {
@@ -51,9 +53,12 @@ export default class App extends Component {
 
   deleteItem = (id) => {
     this.setState(({ tasks }) => {
-      let newArr = tasks.concat().filter((task) => task.id !== id);
+      let newArr = tasks.map((a) => {
+        return { ...a };
+      });
+      let filteredArr = newArr.concat().filter((task) => task.id !== id);
       return {
-        tasks: newArr,
+        tasks: filteredArr,
       };
     });
   };

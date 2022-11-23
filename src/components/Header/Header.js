@@ -2,11 +2,11 @@ import NewTaskForm from "../NewTaskForm";
 
 import "./Header.css";
 
-const Header = () => {
+const Header = ({ onItemAdded }) => {
   return (
     <header className="header">
       <h1 className="header__title">todos</h1>
-      <NewTaskForm />
+      <NewTaskForm onItemAdded={onItemAdded} />
     </header>
   );
 };

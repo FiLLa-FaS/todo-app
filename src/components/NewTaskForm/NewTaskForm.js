@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 
 import "./NewTaskForm.css";
 
@@ -22,14 +22,16 @@ export default class NewTaskForm extends Component {
   };
 
   render() {
+    const { label } = this.state;
+    const { onSubmit, onLabelChange } = this;
     return (
-      <form onSubmit={this.onSubmit}>
+      <form onSubmit={onSubmit}>
         <input
           className="new-task-form"
           placeholder="What needs to be done?"
           autoFocus
-          value={this.state.label}
-          onChange={this.onLabelChange}
+          value={label}
+          onChange={onLabelChange}
         />
       </form>
     );

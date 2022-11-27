@@ -1,4 +1,4 @@
-import { Component } from "react";
+import React, { Component } from "react";
 
 import Header from "../Header";
 import TaskList from "../TaskList";
@@ -141,18 +141,20 @@ export default class App extends Component {
 
   render() {
     const { tasks } = this.state;
+    const { addItem, clearCompleted, changeFilterItems, renderTasks } = this;
+
     const doneCount = tasks.filter((el) => el.status === "completed");
     const todoCount = tasks.length - doneCount.length;
 
     return (
       <section className="app">
-        <Header onItemAdded={this.addItem} />
+        <Header onItemAdded={addItem} />
         <section className="main">
-          {this.renderTasks()}
+          {renderTasks()}
           <Footer
-            onClearCompleted={this.clearCompleted}
+            onClearCompleted={clearCompleted}
             todoCount={todoCount}
-            onFilter={this.changeFilterItems}
+            onFilter={changeFilterItems}
           />
         </section>
       </section>

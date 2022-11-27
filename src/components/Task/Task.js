@@ -1,5 +1,7 @@
-import { Component } from "react";
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
+
 import "./Task.css";
 
 export default class Task extends Component {
@@ -43,11 +45,14 @@ export default class Task extends Component {
   };
 
   render() {
+    const { isEditing } = this.state;
     const { task, markComplete, onDeleted } = this.props;
+    const { renderCheckbox, renderInput, getClasses } = this;
+
     return (
-      <div className={this.getClasses(task.status, this.state.isEditing)}>
+      <div className={getClasses(task.status, isEditing)}>
         <div className="task__view">
-          {this.renderCheckbox(task.status, markComplete)}
+          {renderCheckbox(task.status, markComplete)}
           <label className="task__label">
             <span className="task__description">{task.description}</span>
             <span className="task__created">
@@ -57,8 +62,30 @@ export default class Task extends Component {
           <button className="icon icon-edit"></button>
           <button className="icon icon-destroy" onClick={onDeleted}></button>
         </div>
-        {this.renderInput(this.state.isEditing)}
+        {renderInput(isEditing)}
       </div>
     );
   }
+
+  static defaultProps = {
+    task: {
+      id: 0,
+      description: "имя задачи",
+      createdTime: new Date(),
+      status: "default",
+    },
+    markComplete: () => {},
+    onDeleted: () => {},
+  };
+
+  static propTypes = {
+    task: PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      description: PropTypes.string.isRequired,
+      createdTime: PropTypes.object.isRequired,
+      status: PropTypes.string.isRequired,
+    }),
+    markComplete: PropTypes.func,
+    onDeleted: PropTypes.func,
+  };
 }

@@ -1,3 +1,6 @@
+import React from "react";
+import PropTypes from "prop-types";
+
 import NewTaskForm from "../NewTaskForm";
 
 import "./Header.css";
@@ -9,6 +12,14 @@ const Header = ({ onItemAdded }) => {
       <NewTaskForm onItemAdded={onItemAdded} />
     </header>
   );
+};
+
+Header.defaultProps = {
+  onItemAdded: () => {},
+};
+
+Header.propTypes = {
+  onItemAdded: PropTypes.func,
 };
 
 export default Header;

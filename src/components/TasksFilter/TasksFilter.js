@@ -1,3 +1,6 @@
+import React from "react";
+import PropTypes from "prop-types";
+
 import "./TasksFilter.css";
 
 const TasksFilter = ({ onFilter }) => {
@@ -23,6 +26,14 @@ const TasksFilter = ({ onFilter }) => {
       </li>
     </ul>
   );
+};
+
+TasksFilter.defaultProps = {
+  onFilter: () => {},
+};
+
+TasksFilter.propTypes = {
+  onFilter: PropTypes.func,
 };
 
 export default TasksFilter;

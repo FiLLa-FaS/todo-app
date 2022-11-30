@@ -1,91 +1,76 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import { formatDistanceToNow } from "date-fns";
+import React, { Component } from 'react'
+import PropTypes from 'prop-types'
+import { formatDistanceToNow } from 'date-fns'
 
-import "./Task.css";
+import './Task.css'
 
 export default class Task extends Component {
-  state = {
-    isEditing: false,
-  };
-
-  getClasses = (status, isEditing) => {
-    let classNames = "task";
-    if (status === "completed") {
-      classNames += " task_type_completed";
+  constructor(props) {
+    super(props)
+    this.state = {
+      isEditing: false,
     }
-    if (isEditing) {
-      classNames += " task_type_editing";
-    }
-    return classNames;
-  };
-
-  renderInput = (isEditing) => {
-    if (isEditing) {
-      return (
-        <input type="text" className="task__edit" defaultValue="Editing task" />
-      );
-    }
-  };
-
-  renderCheckbox = (status, markComplete) => {
-    if (status === "completed") {
-      return (
-        <input
-          className="task__toggle"
-          type="checkbox"
-          defaultChecked
-          onClick={markComplete}
-        />
-      );
-    }
-    return (
-      <input className="task__toggle" type="checkbox" onClick={markComplete} />
-    );
-  };
-
-  render() {
-    const { isEditing } = this.state;
-    const { task, markComplete, onDeleted } = this.props;
-    const { renderCheckbox, renderInput, getClasses } = this;
-
-    return (
-      <div className={getClasses(task.status, isEditing)}>
-        <div className="task__view">
-          {renderCheckbox(task.status, markComplete)}
-          <label className="task__label">
-            <span className="task__description">{task.description}</span>
-            <span className="task__created">
-              {formatDistanceToNow(task.createdTime, { addSuffix: true })}
-            </span>
-          </label>
-          <button className="icon icon-edit"></button>
-          <button className="icon icon-destroy" onClick={onDeleted}></button>
-        </div>
-        {renderInput(isEditing)}
-      </div>
-    );
   }
 
-  static defaultProps = {
-    task: {
-      id: 0,
-      description: "имя задачи",
-      createdTime: new Date(),
-      status: "default",
-    },
-    markComplete: () => {},
-    onDeleted: () => {},
-  };
+  static getClasses = (status, isEditing) => {
+    let classNames = 'task'
+    if (status === 'completed') {
+      classNames += ' task_type_completed'
+    }
+    if (isEditing) {
+      classNames += ' task_type_editing'
+    }
+    return classNames
+  }
 
-  static propTypes = {
-    task: PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      description: PropTypes.string.isRequired,
-      createdTime: PropTypes.object.isRequired,
-      status: PropTypes.string.isRequired,
-    }),
-    markComplete: PropTypes.func,
-    onDeleted: PropTypes.func,
-  };
+  static renderInput = () => <input type="text" className="task__edit" defaultValue="Editing task" />
+
+  static renderCheckbox = (status, id, markComplete) => {
+    if (status === 'completed') {
+      return <input className="task__toggle" type="checkbox" defaultChecked onClick={markComplete} id={id} />
+    }
+    return <input className="task__toggle" type="checkbox" onClick={markComplete} id={id} />
+  }
+
+  render() {
+    const { isEditing } = this.state
+    const { task, markComplete, onDeleted } = this.props
+
+    return (
+      <div className={Task.getClasses(task.status, isEditing)}>
+        <div className="task__view">
+          {Task.renderCheckbox(task.status, task.id, markComplete)}
+          <label className="task__label" htmlFor={task.id}>
+            <span className="task__description">{task.description}</span>
+            <span className="task__created">{formatDistanceToNow(task.createdTime, { addSuffix: true })}</span>
+          </label>
+          <button className="icon icon-edit" type="button" aria-label="Edit icon" />
+          <button className="icon icon-destroy" onClick={onDeleted} type="button" aria-label="Delete icon" />
+        </div>
+        {isEditing && Task.renderInput()}
+      </div>
+    )
+  }
+}
+
+Task.defaultProps = {
+  task: {
+    id: 0,
+    description: 'имя задачи',
+    createdTime: new Date(),
+    status: 'default',
+  },
+  markComplete: () => {},
+  onDeleted: () => {},
+}
+
+Task.propTypes = {
+  task: PropTypes.shape({
+    id: PropTypes.number,
+    description: PropTypes.string.isRequired,
+    createdTime: PropTypes.instanceOf(Date),
+    status: PropTypes.string.isRequired,
+  }),
+  markComplete: PropTypes.func,
+  onDeleted: PropTypes.func,
 }

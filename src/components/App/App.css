@@ -1,16 +1,14 @@
 .app {
-    background: #fff;
-    margin: 130px 0 40px 0;
-    position: relative;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
-        0 25px 50px 0 rgba(0, 0, 0, 0.1);
+  background: #fff;
+  margin: 130px 0 40px 0;
+  position: relative;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
 }
 
-
 .main {
-    position: relative;
-    z-index: 2;
-    border-top: 1px solid #e6e6e6;
+  position: relative;
+  z-index: 2;
+  border-top: 1px solid #e6e6e6;
 }
 
 /* .toggle-all {
@@ -46,8 +44,8 @@
     color: #737373;
 } */
 
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    /* .toggle-all {
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  /* .toggle-all {
         background: none;
     }  */
 }

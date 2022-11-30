@@ -1,39 +1,36 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React from 'react'
+import PropTypes from 'prop-types'
 
-import Task from "../Task";
+import Task from '../Task'
 
-import "./TaskList.css";
+import './TaskList.css'
 
-const TaskList = ({ tasks, markComplete, onDeleted }) => {
+function TaskList({ tasks, markComplete, onDeleted }) {
   return (
     <ul className="task-list">
       {tasks.map((task) => {
-        const { id, ...itemProps } = task;
+        const { id, ...itemProps } = task
         return (
           <li key={id}>
-            <Task
-              task={itemProps}
-              markComplete={() => markComplete(id)}
-              onDeleted={() => onDeleted(id)}
-            />
+            <Task task={itemProps} markComplete={() => markComplete(id)} onDeleted={() => onDeleted(id)} />
           </li>
-        );
+        )
       })}
     </ul>
-  );
-};
-
-TaskList.defaultProps = {
-  tasks: [],
-  markComplete: () => {},
-  onDeleted: () => {},
-};
+  )
+}
 
 TaskList.propTypes = {
-  tasks: PropTypes.array.isRequired,
-  markComplete: PropTypes.func,
-  onDeleted: PropTypes.func,
-};
+  tasks: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number,
+      description: PropTypes.string.isRequired,
+      createdTime: PropTypes.instanceOf(Date),
+      status: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  markComplete: PropTypes.func.isRequired,
+  onDeleted: PropTypes.func.isRequired,
+}
 
-export default TaskList;
+export default TaskList

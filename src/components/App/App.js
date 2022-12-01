@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import _uniqueId from 'lodash/uniqueId'
 
 import Header from '../Header'
 import TaskList from '../TaskList'
@@ -7,12 +8,9 @@ import Footer from '../Footer'
 import './App.css'
 
 export default class App extends Component {
-  static maxId = 4
-
-  static createTodoItem(description, maxId) {
-    let minId = maxId
+  static createTodoItem(description) {
     const item = {
-      id: (minId += 1),
+      id: +_uniqueId(),
       description,
       createdTime: new Date(),
       status: 'default',
@@ -25,19 +23,19 @@ export default class App extends Component {
     this.state = {
       tasks: [
         {
-          id: 1,
+          id: +_uniqueId(),
           description: 'Completed task',
           createdTime: new Date('2022-11-21'),
           status: 'completed',
         },
         {
-          id: 2,
+          id: +_uniqueId(),
           description: 'Editing task',
           createdTime: new Date('2022-11-20'),
           status: 'default',
         },
         {
-          id: 3,
+          id: +_uniqueId(),
           description: 'Active task',
           createdTime: new Date('2022-11-19'),
           status: 'default',
@@ -49,7 +47,7 @@ export default class App extends Component {
   }
 
   addItem = (text) => {
-    const newItem = App.createTodoItem(text, this.maxId)
+    const newItem = App.createTodoItem(text)
 
     this.setState(({ tasks }) => {
       const newArray = [...tasks, newItem]
@@ -62,20 +60,13 @@ export default class App extends Component {
 
   markComplete = (id) => {
     this.setState(({ tasks }) => {
-      const newArr = tasks.map((a) => ({ ...a }))
-      newArr.map((task) => {
-        const newTask = { ...task }
-        if (newTask.id === id) {
-          if (newTask.status === 'default') {
-            newTask.status = 'completed'
-          } else {
-            newTask.status = 'default'
-          }
-        }
-        return newTask
-      })
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      const newItem = tasks[idx].status === 'default' ? 'completed' : 'default'
+      const currentItem = { ...oldItem, status: newItem }
+
       return {
-        tasks: newArr,
+        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
       }
     })
   }

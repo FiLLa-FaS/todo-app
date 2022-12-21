@@ -23,7 +23,11 @@ export default class Task extends Component {
     return classNames
   }
 
-  static renderInput = () => <input type="text" className="task__edit" defaultValue="Editing task" />
+  handleTaskEditing = () => {
+    this.setState({ isEditing: true })
+  }
+
+  static renderInput = (label) => <input type="text" className="task__edit" defaultValue={label} />
 
   static renderCheckbox = (status, id, markComplete) => {
     if (status === 'completed') {
@@ -44,10 +48,10 @@ export default class Task extends Component {
             <span className="task__description">{task.description}</span>
             <span className="task__created">{formatDistanceToNow(task.createdTime, { addSuffix: true })}</span>
           </label>
-          <button className="icon icon-edit" type="button" aria-label="Edit icon" />
+          <button className="icon icon-edit" type="button" onClick={this.handleTaskEditing} aria-label="Edit icon" />
           <button className="icon icon-destroy" onClick={onDeleted} type="button" aria-label="Delete icon" />
         </div>
-        {isEditing && Task.renderInput()}
+        {isEditing && Task.renderInput(task.description)}
       </div>
     )
   }

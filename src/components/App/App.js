@@ -8,12 +8,25 @@ import Footer from '../Footer'
 import './App.css'
 
 export default class App extends Component {
-  static createTodoItem(description) {
+  static createTodoItem(description, min = 0, sec = 0) {
+    let seconds = 0
+    let timerDirection = ''
+    if (!min && !sec) {
+      seconds = 0
+      timerDirection = 'up'
+    } else {
+      seconds = +min * 60 + +sec
+      timerDirection = 'down'
+    }
+
     const item = {
       id: +_uniqueId(),
       description,
       createdTime: new Date(),
       status: 'default',
+      seconds,
+      timerDirection,
+      timer: 0,
     }
     return item
   }
@@ -27,18 +40,27 @@ export default class App extends Component {
           description: 'Completed task',
           createdTime: new Date('2022-11-21'),
           status: 'completed',
+          seconds: 3600,
+          timerDirection: 'down',
+          timer: 0,
         },
         {
           id: +_uniqueId(),
           description: 'Editing task',
           createdTime: new Date('2022-11-20'),
           status: 'default',
+          seconds: 1200,
+          timerDirection: 'down',
+          timer: 0,
         },
         {
           id: +_uniqueId(),
           description: 'Active task',
           createdTime: new Date('2022-11-19'),
           status: 'default',
+          seconds: 50,
+          timerDirection: 'down',
+          timer: 0,
         },
       ],
 
@@ -46,8 +68,8 @@ export default class App extends Component {
     }
   }
 
-  addItem = (text) => {
-    const newItem = App.createTodoItem(text)
+  addItem = (text, min, sec) => {
+    const newItem = App.createTodoItem(text, min, sec)
 
     this.setState(({ tasks }) => {
       const newArray = [...tasks, newItem]
@@ -112,9 +134,74 @@ export default class App extends Component {
     return tasks
   }
 
+  startTimer = (id) => {
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      if (oldItem.timer !== 0) {
+        clearInterval(oldItem.timer)
+      }
+      const newItem =
+        tasks[idx].timerDirection === 'up'
+          ? setInterval(() => this.countUp(id), 1000)
+          : setInterval(() => this.countDown(id), 1000)
+      const currentItem = { ...oldItem, timer: newItem }
+
+      return {
+        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
+      }
+    })
+  }
+
+  stopTimer = (id) => {
+    const { tasks } = this.state
+    const idx = tasks.findIndex((el) => el.id === id)
+    const oldItem = tasks[idx]
+    clearInterval(oldItem.timer)
+  }
+
+  countUp = (id) => {
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      const newItem = oldItem.seconds + 1
+      const currentItem = { ...oldItem, seconds: newItem }
+
+      return {
+        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
+      }
+    })
+  }
+
+  countDown = (id) => {
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      const newItem = oldItem.seconds - 1
+      const currentItem =
+        newItem === 0 ? { ...oldItem, seconds: newItem, timerDirection: 'up' } : { ...oldItem, seconds: newItem }
+
+      if (newItem === 0) {
+        this.stopTimer(id)
+      }
+
+      return {
+        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
+      }
+    })
+  }
+
   renderTasks = () => {
     const arr = this.filterItems()
-    return <TaskList tasks={arr} markComplete={this.markComplete} onDeleted={this.deleteItem} />
+    return (
+      <TaskList
+        tasks={arr}
+        markComplete={this.markComplete}
+        onDeleted={this.deleteItem}
+        startTimer={this.startTimer}
+        stopTimer={this.stopTimer}
+      />
+    )
   }
 
   render() {

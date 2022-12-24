@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
@@ -5,6 +6,22 @@ import { formatDistanceToNow } from 'date-fns'
 import './Task.css'
 
 export default class Task extends Component {
+  static formatSeconds = (sec) => {
+    let hours = 0
+    let minutes = 0
+    let seconds = 0
+
+    if (sec >= 3600) {
+      hours = Math.floor(sec / 3600)
+    }
+    if (sec >= 60) {
+      minutes = Math.floor((sec % 3600) / 60)
+    }
+    seconds = sec - hours * 3600 - minutes * 60
+
+    return `${hours}h:${minutes}m:${seconds}s`
+  }
+
   constructor(props) {
     super(props)
     this.state = {
@@ -12,7 +29,7 @@ export default class Task extends Component {
     }
   }
 
-  static getClasses = (status, isEditing) => {
+  static getTaskClasses = (status, isEditing) => {
     let classNames = 'task'
     if (status === 'completed') {
       classNames += ' task_type_completed'
@@ -21,10 +38,6 @@ export default class Task extends Component {
       classNames += ' task_type_editing'
     }
     return classNames
-  }
-
-  handleTaskEditing = () => {
-    this.setState({ isEditing: true })
   }
 
   static renderInput = (label) => <input type="text" className="task__edit" defaultValue={label} />
@@ -36,16 +49,25 @@ export default class Task extends Component {
     return <input className="task__toggle" type="checkbox" onClick={markComplete} id={id} />
   }
 
+  handleTaskEditing = () => {
+    this.setState({ isEditing: true })
+  }
+
   render() {
     const { isEditing } = this.state
-    const { task, markComplete, onDeleted } = this.props
+    const { task, markComplete, onDeleted, startTimer, stopTimer } = this.props
 
     return (
-      <div className={Task.getClasses(task.status, isEditing)}>
+      <div className={Task.getTaskClasses(task.status, isEditing)}>
         <div className="task__view">
           {Task.renderCheckbox(task.status, task.id, markComplete)}
           <label className="task__label" htmlFor={task.id}>
-            <span className="task__description">{task.description}</span>
+            <span className="task__title">{task.description}</span>
+            <span className="task__description">
+              <button className="icon icon-play" type="button" onClick={startTimer} />
+              <button className="icon icon-pause" type="button" onClick={stopTimer} />
+              {Task.formatSeconds(task.seconds)}
+            </span>
             <span className="task__created">{formatDistanceToNow(task.createdTime, { addSuffix: true })}</span>
           </label>
           <button className="icon icon-edit" type="button" onClick={this.handleTaskEditing} aria-label="Edit icon" />
@@ -63,9 +85,14 @@ Task.defaultProps = {
     description: 'имя задачи',
     createdTime: new Date(),
     status: 'default',
+    seconds: 0,
+    timerDirection: 'up',
+    timer: 0,
   },
   markComplete: () => {},
   onDeleted: () => {},
+  startTimer: () => {},
+  stopTimer: () => {},
 }
 
 Task.propTypes = {
@@ -74,7 +101,12 @@ Task.propTypes = {
     description: PropTypes.string.isRequired,
     createdTime: PropTypes.instanceOf(Date),
     status: PropTypes.string.isRequired,
+    seconds: PropTypes.number,
+    timerDirection: PropTypes.string,
+    timer: PropTypes.number,
   }),
   markComplete: PropTypes.func,
   onDeleted: PropTypes.func,
+  startTimer: PropTypes.func,
+  stopTimer: PropTypes.func,
 }

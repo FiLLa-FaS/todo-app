@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { formatDistanceToNow } from 'date-fns'
@@ -6,27 +5,16 @@ import { formatDistanceToNow } from 'date-fns'
 import './Task.css'
 
 export default class Task extends Component {
-  static formatSeconds = (sec) => {
-    let hours = 0
+  static formatSeconds = (sec = 0) => {
     let minutes = 0
     let seconds = 0
 
-    if (sec >= 3600) {
-      hours = Math.floor(sec / 3600)
-    }
     if (sec >= 60) {
       minutes = Math.floor((sec % 3600) / 60)
     }
-    seconds = sec - hours * 3600 - minutes * 60
+    seconds = sec - minutes * 60
 
-    return `${hours}h:${minutes}m:${seconds}s`
-  }
-
-  constructor(props) {
-    super(props)
-    this.state = {
-      isEditing: false,
-    }
+    return `${minutes}m:${seconds}s`
   }
 
   static getTaskClasses = (status, isEditing) => {
@@ -40,8 +28,6 @@ export default class Task extends Component {
     return classNames
   }
 
-  static renderInput = (label) => <input type="text" className="task__edit" defaultValue={label} />
-
   static renderCheckbox = (status, id, markComplete) => {
     if (status === 'completed') {
       return <input className="task__toggle" type="checkbox" defaultChecked onClick={markComplete} id={id} />
@@ -49,8 +35,81 @@ export default class Task extends Component {
     return <input className="task__toggle" type="checkbox" onClick={markComplete} id={id} />
   }
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      isEditing: false,
+      label: props.task.description,
+    }
+    this.inputEditRef = React.createRef()
+  }
+
+  componentDidMount() {
+    document.addEventListener('mousedown', this.handleClickOutside)
+    document.addEventListener('keydown', this.handleEscKey, false)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { isEditing } = this.state
+    if (prevState.isEditing !== isEditing) {
+      if (this.inputEditRef.current) {
+        this.inputEditRef.current.focus()
+      }
+    }
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('mousedown', this.handleClickOutside)
+    document.removeEventListener('keydown', this.handleEscKey, false)
+  }
+
+  handleClickOutside = (event) => {
+    const { task } = this.props
+    if (this.inputEditRef.current && !this.inputEditRef.current.contains(event.target)) {
+      this.setState({ isEditing: false, label: task.description })
+    }
+  }
+
+  handleEscKey = (event) => {
+    const { isEditing } = this.state
+    const { task } = this.props
+    if (isEditing && event.key === 'Escape') {
+      this.setState({ isEditing: false, label: task.description })
+    }
+  }
+
+  onSubmit = (e) => {
+    const { editItemDescription, task } = this.props
+    const { label } = this.state
+    e.preventDefault()
+    editItemDescription(task.id, label)
+    this.setState({ isEditing: false })
+  }
+
+  onLabelChange = (e) => {
+    this.setState({
+      label: e.target.value,
+    })
+  }
+
   handleTaskEditing = () => {
     this.setState({ isEditing: true })
+  }
+
+  renderInput = (onSubmit, onLabelChange) => {
+    const { label } = this.state
+    return (
+      <form onSubmit={onSubmit}>
+        <input
+          ref={this.inputEditRef}
+          type="text"
+          className="task__edit"
+          value={label}
+          name="inputEdit"
+          onChange={onLabelChange}
+        />
+      </form>
+    )
   }
 
   render() {
@@ -64,8 +123,8 @@ export default class Task extends Component {
           <label className="task__label" htmlFor={task.id}>
             <span className="task__title">{task.description}</span>
             <span className="task__description">
-              <button className="icon icon-play" type="button" onClick={startTimer} />
-              <button className="icon icon-pause" type="button" onClick={stopTimer} />
+              <button className="icon icon-play" type="button" onClick={startTimer} aria-label="Start timer button" />
+              <button className="icon icon-pause" type="button" onClick={stopTimer} aria-label="Stop timer button" />
               {Task.formatSeconds(task.seconds)}
             </span>
             <span className="task__created">{formatDistanceToNow(task.createdTime, { addSuffix: true })}</span>
@@ -73,7 +132,7 @@ export default class Task extends Component {
           <button className="icon icon-edit" type="button" onClick={this.handleTaskEditing} aria-label="Edit icon" />
           <button className="icon icon-destroy" onClick={onDeleted} type="button" aria-label="Delete icon" />
         </div>
-        {isEditing && Task.renderInput(task.description)}
+        {isEditing && this.renderInput(this.onSubmit, this.onLabelChange)}
       </div>
     )
   }

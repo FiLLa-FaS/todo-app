@@ -5,19 +5,20 @@ import Task from '../Task'
 
 import './TaskList.css'
 
-function TaskList({ tasks, markComplete, onDeleted, startTimer, stopTimer }) {
+function TaskList({ tasks, markComplete, onDeleted, startTimer, stopTimer, editItemDescription }) {
   return (
     <ul className="task-list">
       {tasks.map((task) => {
-        const { id, ...itemProps } = task
+        const { id } = task
         return (
           <li key={id}>
             <Task
-              task={itemProps}
+              task={task}
               markComplete={() => markComplete(id)}
               onDeleted={() => onDeleted(id)}
               startTimer={() => startTimer(id)}
               stopTimer={() => stopTimer(id)}
+              editItemDescription={editItemDescription}
             />
           </li>
         )

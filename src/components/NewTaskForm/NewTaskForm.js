@@ -55,6 +55,7 @@ export default class NewTaskForm extends Component {
           placeholder="Min"
           onChange={onMinChange}
           min="0"
+          max="59"
         />
         <input
           type="number"
@@ -63,6 +64,7 @@ export default class NewTaskForm extends Component {
           placeholder="Sec"
           onChange={onSecChange}
           min="0"
+          max="59"
         />
         <input type="submit" hidden />
       </form>

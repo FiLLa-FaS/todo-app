@@ -40,7 +40,7 @@ export default class App extends Component {
           description: 'Completed task',
           createdTime: new Date('2022-11-21'),
           status: 'completed',
-          seconds: 3600,
+          seconds: 3599,
           timerDirection: 'down',
           timer: 0,
         },
@@ -80,6 +80,19 @@ export default class App extends Component {
     })
   }
 
+  editItemDescription = (id, label) => {
+    this.setState(({ tasks }) => {
+      const idx = tasks.findIndex((el) => el.id === id)
+      const oldItem = tasks[idx]
+      const newItem = label
+      const currentItem = { ...oldItem, description: newItem }
+
+      return {
+        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
+      }
+    })
+  }
+
   markComplete = (id) => {
     this.setState(({ tasks }) => {
       const idx = tasks.findIndex((el) => el.id === id)
@@ -97,6 +110,7 @@ export default class App extends Component {
     this.setState(({ tasks }) => {
       const newArr = tasks.map((a) => ({ ...a }))
       const filteredArr = newArr.filter((task) => task.id !== id)
+      this.stopTimer(id)
       return {
         tasks: filteredArr,
       }
@@ -146,7 +160,6 @@ export default class App extends Component {
           ? setInterval(() => this.countUp(id), 1000)
           : setInterval(() => this.countDown(id), 1000)
       const currentItem = { ...oldItem, timer: newItem }
-
       return {
         tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
       }
@@ -166,6 +179,10 @@ export default class App extends Component {
       const oldItem = tasks[idx]
       const newItem = oldItem.seconds + 1
       const currentItem = { ...oldItem, seconds: newItem }
+
+      if (newItem === 3599) {
+        this.stopTimer(id)
+      }
 
       return {
         tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
@@ -200,6 +217,7 @@ export default class App extends Component {
         onDeleted={this.deleteItem}
         startTimer={this.startTimer}
         stopTimer={this.stopTimer}
+        editItemDescription={this.editItemDescription}
       />
     )
   }

@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import _uniqueId from 'lodash/uniqueId'
 
 import Header from '../Header'
@@ -7,8 +7,40 @@ import Footer from '../Footer'
 
 import './App.css'
 
-export default class App extends Component {
-  static createTodoItem(description, min = 0, sec = 0) {
+function App() {
+  const [tasks, setTasks] = useState([
+    {
+      id: +_uniqueId(),
+      description: 'Completed task',
+      createdTime: new Date('2022-11-21'),
+      status: 'completed',
+      seconds: 3599,
+      timerDirection: 'down',
+      timer: 0,
+    },
+    {
+      id: +_uniqueId(),
+      description: 'Editing task',
+      createdTime: new Date('2022-11-20'),
+      status: 'default',
+      seconds: 1200,
+      timerDirection: 'down',
+      timer: 0,
+    },
+    {
+      id: +_uniqueId(),
+      description: 'Active task',
+      createdTime: new Date('2022-11-19'),
+      status: 'default',
+      seconds: 50,
+      timerDirection: 'down',
+      timer: 0,
+    },
+  ])
+
+  const [tabs, setTabs] = useState('all')
+
+  function createTodoItem(description, min = 0, sec = 0) {
     let seconds = 0
     let timerDirection = ''
     if (!min && !sec) {
@@ -31,112 +63,66 @@ export default class App extends Component {
     return item
   }
 
-  constructor(props) {
-    super(props)
-    this.state = {
-      tasks: [
-        {
-          id: +_uniqueId(),
-          description: 'Completed task',
-          createdTime: new Date('2022-11-21'),
-          status: 'completed',
-          seconds: 3599,
-          timerDirection: 'down',
-          timer: 0,
-        },
-        {
-          id: +_uniqueId(),
-          description: 'Editing task',
-          createdTime: new Date('2022-11-20'),
-          status: 'default',
-          seconds: 1200,
-          timerDirection: 'down',
-          timer: 0,
-        },
-        {
-          id: +_uniqueId(),
-          description: 'Active task',
-          createdTime: new Date('2022-11-19'),
-          status: 'default',
-          seconds: 50,
-          timerDirection: 'down',
-          timer: 0,
-        },
-      ],
+  const addItem = (text, min, sec) => {
+    const newItem = createTodoItem(text, min, sec)
 
-      tabs: 'all',
-    }
+    setTasks((prevTasks) => [...prevTasks, newItem])
   }
 
-  addItem = (text, min, sec) => {
-    const newItem = App.createTodoItem(text, min, sec)
-
-    this.setState(({ tasks }) => {
-      const newArray = [...tasks, newItem]
-
-      return {
-        tasks: newArray,
-      }
-    })
-  }
-
-  editItemDescription = (id, label) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
+  const editItemDescription = (id, label) => {
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
       const newItem = label
       const currentItem = { ...oldItem, description: newItem }
 
-      return {
-        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
-      }
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })
   }
 
-  markComplete = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      const newItem = tasks[idx].status === 'default' ? 'completed' : 'default'
+  const markComplete = (id) => {
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
+      const newItem = prevTasks[idx].status === 'default' ? 'completed' : 'default'
       const currentItem = { ...oldItem, status: newItem }
 
-      return {
-        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
-      }
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })
   }
 
-  deleteItem = (id) => {
-    this.setState(({ tasks }) => {
-      const newArr = tasks.map((a) => ({ ...a }))
-      const filteredArr = newArr.filter((task) => task.id !== id)
-      this.stopTimer(id)
-      return {
-        tasks: filteredArr,
-      }
+  const stopTimer = (id) => {
+    console.log(tasks)
+
+    const idx = tasks.findIndex((el) => el.id === id)
+    const oldItem = tasks[idx]
+    console.log(oldItem.timer)
+    clearInterval(oldItem.timer)
+  }
+
+  const deleteItem = (id) => {
+    setTasks((prevTasks) => {
+      const filteredArr = prevTasks.filter((task) => task.id !== id)
+      stopTimer(id)
+      return filteredArr
     })
   }
 
-  clearCompleted = () => {
-    const { tasks } = this.state
+  const clearCompleted = () => {
     const completedArr = tasks.filter((el) => el.status === 'completed')
-    completedArr.forEach((el) => this.deleteItem(el.id))
+    completedArr.forEach((el) => deleteItem(el.id))
   }
 
-  changeFilterItems = (e) => {
-    this.setState(() => {
-      const el = e.target
-      const buttons = document.querySelectorAll('.tasks-filter__button')
-      buttons.forEach((button) => button.classList.remove('tasks-filter__button_selected'))
-      el.classList.add('tasks-filter__button_selected')
-      return {
-        tabs: el.textContent.toLowerCase(),
-      }
-    })
+  const changeFilterItems = (e) => {
+    const el = e.target
+    const buttons = document.querySelectorAll('.tasks-filter__button')
+    buttons.forEach((button) => button.classList.remove('tasks-filter__button_selected'))
+    el.classList.add('tasks-filter__button_selected')
+
+    setTabs(el.textContent.toLowerCase())
   }
 
-  filterItems = () => {
-    const { tabs, tasks } = this.state
+  const filterItems = () => {
     if (tabs === 'active') {
       const activeArr = tasks.filter((el) => el.status === 'default')
       return activeArr
@@ -148,95 +134,81 @@ export default class App extends Component {
     return tasks
   }
 
-  startTimer = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
-      if (oldItem.timer !== 0) {
-        clearInterval(oldItem.timer)
-      }
-      const newItem =
-        tasks[idx].timerDirection === 'up'
-          ? setInterval(() => this.countUp(id), 1000)
-          : setInterval(() => this.countDown(id), 1000)
-      const currentItem = { ...oldItem, timer: newItem }
-      return {
-        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
-      }
-    })
-  }
-
-  stopTimer = (id) => {
-    const { tasks } = this.state
-    const idx = tasks.findIndex((el) => el.id === id)
-    const oldItem = tasks[idx]
-    clearInterval(oldItem.timer)
-  }
-
-  countUp = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
+  const countUp = (id) => {
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
       const newItem = oldItem.seconds + 1
       const currentItem = { ...oldItem, seconds: newItem }
 
       if (newItem === 3599) {
-        this.stopTimer(id)
+        stopTimer(id)
       }
 
-      return {
-        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
-      }
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })
   }
 
-  countDown = (id) => {
-    this.setState(({ tasks }) => {
-      const idx = tasks.findIndex((el) => el.id === id)
-      const oldItem = tasks[idx]
+  const countDown = (id) => {
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
       const newItem = oldItem.seconds - 1
       const currentItem =
         newItem === 0 ? { ...oldItem, seconds: newItem, timerDirection: 'up' } : { ...oldItem, seconds: newItem }
 
       if (newItem === 0) {
-        this.stopTimer(id)
+        console.log(id)
+        stopTimer(id)
       }
 
-      return {
-        tasks: [...tasks.slice(0, idx), currentItem, ...tasks.slice(idx + 1)],
-      }
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })
   }
 
-  renderTasks = () => {
-    const arr = this.filterItems()
+  const startTimer = (id) => {
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
+      if (oldItem.timer !== 0) {
+        clearInterval(oldItem.timer)
+      }
+      const newItem =
+        prevTasks[idx].timerDirection === 'up'
+          ? setInterval(() => countUp(id), 1000)
+          : setInterval(() => countDown(id), 1000)
+      console.log(newItem)
+      const currentItem = { ...oldItem, timer: newItem }
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
+    })
+  }
+
+  const renderTasks = () => {
+    const arr = filterItems()
     return (
       <TaskList
         tasks={arr}
-        markComplete={this.markComplete}
-        onDeleted={this.deleteItem}
-        startTimer={this.startTimer}
-        stopTimer={this.stopTimer}
-        editItemDescription={this.editItemDescription}
+        markComplete={markComplete}
+        onDeleted={deleteItem}
+        startTimer={startTimer}
+        stopTimer={stopTimer}
+        editItemDescription={editItemDescription}
       />
     )
   }
 
-  render() {
-    const { tasks } = this.state
-    const { addItem, clearCompleted, changeFilterItems, renderTasks } = this
+  const doneCount = tasks.filter((el) => el.status === 'completed')
+  const todoCount = tasks.length - doneCount.length
 
-    const doneCount = tasks.filter((el) => el.status === 'completed')
-    const todoCount = tasks.length - doneCount.length
-
-    return (
-      <section className="app">
-        <Header onItemAdded={addItem} />
-        <section className="main">
-          {renderTasks()}
-          <Footer onClearCompleted={clearCompleted} todoCount={todoCount} onFilter={changeFilterItems} />
-        </section>
+  return (
+    <section className="app">
+      <Header onItemAdded={addItem} />
+      <section className="main">
+        {renderTasks()}
+        <Footer onClearCompleted={clearCompleted} todoCount={todoCount} onFilter={changeFilterItems} />
       </section>
-    )
-  }
+    </section>
+  )
 }
+
+export default App

@@ -92,11 +92,8 @@ function App() {
   }
 
   const stopTimer = (id) => {
-    console.log(tasks)
-
     const idx = tasks.findIndex((el) => el.id === id)
     const oldItem = tasks[idx]
-    console.log(oldItem.timer)
     clearInterval(oldItem.timer)
   }
 
@@ -158,7 +155,6 @@ function App() {
         newItem === 0 ? { ...oldItem, seconds: newItem, timerDirection: 'up' } : { ...oldItem, seconds: newItem }
 
       if (newItem === 0) {
-        console.log(id)
         stopTimer(id)
       }
 
@@ -177,7 +173,6 @@ function App() {
         prevTasks[idx].timerDirection === 'up'
           ? setInterval(() => countUp(id), 1000)
           : setInterval(() => countDown(id), 1000)
-      console.log(newItem)
       const currentItem = { ...oldItem, timer: newItem }
       return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })

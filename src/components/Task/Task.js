@@ -7,6 +7,7 @@ import './Task.css'
 function Task({ task, markComplete, onDeleted, startTimer, stopTimer, editItemDescription }) {
   const [isEditing, setIsEditing] = useState(false)
   const [label, setLabel] = useState(task.description)
+  const [isTimerActive, setIsTimerActive] = useState(task.isTimerActive)
   const inputEditRef = useRef(null)
 
   const formatSeconds = (sec = 0) => {
@@ -73,6 +74,13 @@ function Task({ task, markComplete, onDeleted, startTimer, stopTimer, editItemDe
     [isEditing, task.description]
   )
 
+  const renderButton = () => {
+    if (isTimerActive) {
+      return <button className="icon icon-pause" type="button" onClick={stopTimer} aria-label="Stop timer button" />
+    }
+    return <button className="icon icon-play" type="button" onClick={startTimer} aria-label="Start timer button" />
+  }
+
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside)
     document.addEventListener('keydown', handleEscKey, false)
@@ -88,6 +96,10 @@ function Task({ task, markComplete, onDeleted, startTimer, stopTimer, editItemDe
     }
   }, [isEditing])
 
+  useEffect(() => {
+    setIsTimerActive(task.isTimerActive)
+  }, [task.isTimerActive])
+
   return (
     <div className={getTaskClasses(task.status)}>
       <div className="task__view">
@@ -95,8 +107,8 @@ function Task({ task, markComplete, onDeleted, startTimer, stopTimer, editItemDe
         <label className="task__label" htmlFor={task.id}>
           <span className="task__title">{task.description}</span>
           <span className="task__description">
-            <button className="icon icon-play" type="button" onClick={startTimer} aria-label="Start timer button" />
-            <button className="icon icon-pause" type="button" onClick={stopTimer} aria-label="Stop timer button" />
+            {renderButton()}
+
             {formatSeconds(task.seconds)}
           </span>
           <span className="task__created">{formatDistanceToNow(task.createdTime, { addSuffix: true })}</span>
@@ -131,6 +143,7 @@ Task.defaultProps = {
     seconds: 0,
     timerDirection: 'up',
     timer: 0,
+    isTimerActive: false,
   },
   markComplete: () => {},
   onDeleted: () => {},
@@ -147,6 +160,7 @@ Task.propTypes = {
     seconds: PropTypes.number,
     timerDirection: PropTypes.string,
     timer: PropTypes.number,
+    isTimerActive: PropTypes.bool,
   }),
   markComplete: PropTypes.func,
   onDeleted: PropTypes.func,

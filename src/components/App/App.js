@@ -17,6 +17,7 @@ function App() {
       seconds: 3599,
       timerDirection: 'down',
       timer: 0,
+      isTimerActive: false,
     },
     {
       id: +_uniqueId(),
@@ -26,6 +27,7 @@ function App() {
       seconds: 1200,
       timerDirection: 'down',
       timer: 0,
+      isTimerActive: false,
     },
     {
       id: +_uniqueId(),
@@ -35,6 +37,7 @@ function App() {
       seconds: 50,
       timerDirection: 'down',
       timer: 0,
+      isTimerActive: false,
     },
   ])
 
@@ -59,6 +62,7 @@ function App() {
       seconds,
       timerDirection,
       timer: 0,
+      isTimerActive: false,
     }
     return item
   }
@@ -92,9 +96,13 @@ function App() {
   }
 
   const stopTimer = (id) => {
-    const idx = tasks.findIndex((el) => el.id === id)
-    const oldItem = tasks[idx]
-    clearInterval(oldItem.timer)
+    setTasks((prevTasks) => {
+      const idx = prevTasks.findIndex((el) => el.id === id)
+      const oldItem = prevTasks[idx]
+      const currentItem = { ...oldItem, isTimerActive: false }
+      clearInterval(oldItem.timer)
+      return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
+    })
   }
 
   const deleteItem = (id) => {
@@ -166,14 +174,11 @@ function App() {
     setTasks((prevTasks) => {
       const idx = prevTasks.findIndex((el) => el.id === id)
       const oldItem = prevTasks[idx]
-      if (oldItem.timer !== 0) {
-        clearInterval(oldItem.timer)
-      }
       const newItem =
         prevTasks[idx].timerDirection === 'up'
           ? setInterval(() => countUp(id), 1000)
           : setInterval(() => countDown(id), 1000)
-      const currentItem = { ...oldItem, timer: newItem }
+      const currentItem = { ...oldItem, timer: newItem, isTimerActive: true }
       return [...prevTasks.slice(0, idx), currentItem, ...prevTasks.slice(idx + 1)]
     })
   }

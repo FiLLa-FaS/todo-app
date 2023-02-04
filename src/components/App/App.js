@@ -43,10 +43,10 @@ function App() {
 
   const [tabs, setTabs] = useState('all')
 
-  function createTodoItem(description, min = 0, sec = 0) {
-    let seconds = 0
-    let timerDirection = ''
-    if (!min && !sec) {
+  function createTodoItem(description, min, sec) {
+    let seconds
+    let timerDirection
+    if (min === '' && sec === '') {
       seconds = 0
       timerDirection = 'up'
     } else {
@@ -106,9 +106,9 @@ function App() {
   }
 
   const deleteItem = (id) => {
+    stopTimer(id)
     setTasks((prevTasks) => {
       const filteredArr = prevTasks.filter((task) => task.id !== id)
-      stopTimer(id)
       return filteredArr
     })
   }
